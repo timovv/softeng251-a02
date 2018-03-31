@@ -1,8 +1,15 @@
 package tbs.server;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * A performance in the Theatre Booking System.
+ *
+ * Each performance is of an act, and is performed in a specific theatre at a specific start time.
+ */
 public class Performance implements Identifiable {
 
     private final IDGenerator idGenerator;
@@ -11,8 +18,8 @@ public class Performance implements Identifiable {
     private final Theatre theatre;
     private final String startTime;
     private final int premiumSeatPrice, cheapSeatPrice;
-
-    private final Ticket[][] tickets;
+    
+    private final Map<Seat, Ticket> tickets = new HashMap<>();
 
     public Performance(IDGenerator idGenerator, Act act, Theatre theatre, String startTime, String premiumPriceStr,
                        String cheapSeatsStr) {
@@ -34,7 +41,6 @@ public class Performance implements Identifiable {
         this.startTime = startTime;
         this.premiumSeatPrice = premiumSeatPrice;
         this.cheapSeatPrice = cheapSeatPrice;
-        this.tickets = new Ticket[theatre.getSeatingDimension()][theatre.getSeatingDimension()];
     }
 
     private static int parsePriceString(String price) {
@@ -54,26 +60,42 @@ public class Performance implements Identifiable {
                 || seatNumber > theatre.getSeatingDimension()) {
             throw new TBSException("Seat is out of bounds for this theatre");
         }
-
-        if (tickets[rowNumber - 1][seatNumber - 1] != null) {
+        
+        Seat seat = theatre.getSeatAt(rowNumber, seatNumber);
+        
+        if (tickets.get(theatre.getSeatAt(rowNumber, seatNumber)) != null) {
             throw new TBSException("Seat [" + rowNumber + ", " + seatNumber + "] is already taken.");
         }
 
-        Ticket ticket = new Ticket(idGenerator);
-        tickets[rowNumber - 1][seatNumber - 1] = ticket;
+        Ticket ticket = new Ticket(idGenerator, calculatePriceForSeat(seat));
+        tickets.put(seat, ticket);
         return ticket;
     }
 
     public List<Seat> getAvailableSeats() {
         List<Seat> output = new ArrayList<>();
         for(Seat seat : theatre.getSeats()) {
-            if(tickets[seat.getRowNumber() - 1][seat.getSeatNumber() - 1] == null) {
+            if(tickets.get(seat) == null) {
                 output.add(seat);
             }
         }
 
         return output;
     }
+    
+    public List<Ticket> getIssuedTickets() {
+    	return new ArrayList<>(tickets.values());
+    }
+    
+    private int calculatePriceForSeat(Seat seat) {
+    	if(seat.isPremiumSeat()) {
+    		return premiumSeatPrice;
+    	} else {
+    		return cheapSeatPrice;
+    	}
+    }
+    
+    // GETTERS AND SETTERS
 
     @Override
     public String getId() {

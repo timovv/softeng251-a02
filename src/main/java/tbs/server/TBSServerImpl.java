@@ -12,8 +12,7 @@ import java.util.*;
  * @version 1.0-SNAPSHOT
  */
 public class TBSServerImpl implements TBSServer {
-    private final QuoteFactory quoteFactory = new RichardStallmanQuoteFactory();
-    private final IDGenerator idGenerator = new UUIDIDGenerator();
+    private final IDGenerator idGenerator = new AutoIncrementIDGenerator();
     private final TBSServerState state = new MemoryTBSServerState();
     private final SalesReportFormatter salesReportFormatter = new TBSSalesReportFormatter(state);
 
@@ -30,15 +29,15 @@ public class TBSServerImpl implements TBSServer {
         TheatreParser parser;
         try {
             parser = new TheatreParser(new File(path));
-        } catch(FileNotFoundException e) {
+        } catch(FileNotFoundException | TBSException e) {
             return "ERROR File " + path + " does not exist.";
         }
 
         List<Theatre> theatresToAdd;
         try {
             theatresToAdd = parser.readAllRemaining();
-        } catch(RuntimeException e) {
-            return "ERROR " + e.getMessage();
+        } catch(TBSException e) {
+        	return error(e.getMessage());
         }
 
         state.getTheatreRepository().addAll(theatresToAdd);
@@ -117,8 +116,20 @@ public class TBSServerImpl implements TBSServer {
      * {@inheritDoc}
      */
     public String addArtist(String name) {
+        if(name == null) {
+            return error("name is null!");
+        }
+
+        if(name.isEmpty()) {
+            return error("name cannot be empty!");
+        }
+
         Artist artist = new Artist(idGenerator, name);
-        state.getArtistRepository().add(artist);
+        try {
+            state.getArtistRepository().add(artist);
+        } catch(TBSException e) {
+            return error(e.getMessage());
+        }
         return artist.getId();
     }
 
@@ -144,6 +155,7 @@ public class TBSServerImpl implements TBSServer {
         }
 
         Act act = new Act(idGenerator, artist, title, minutesDuration);
+        state.getActRepository().add(act);
         return act.getId();
     }
 
@@ -151,6 +163,37 @@ public class TBSServerImpl implements TBSServer {
      * {@inheritDoc}
      */
     public String schedulePerformance(String actID, String theatreID, String startTimeStr, String premiumPriceStr, String cheapSeatsStr) {
+    	if(actID == null) {
+    		return error("actID is null!");
+    	}
+    	if(theatreID == null) {
+    		return error("theatreID is null!");
+    	}
+    	
+    	if(actID.isEmpty()) {
+    		return error("actID is empty!");
+    	}
+    	if(theatreID.isEmpty()) {
+    		return error("theatreID is empty!");
+    	}
+    	
+    	Act act = state.getActRepository().getById(actID);
+    	Theatre theatre = state.getTheatreRepository().getById(theatreID);
+    	
+    	if(act == null) {
+    		return error("No act with id " + actID);
+    	}
+    	if(theatre == null) {
+    		return error("No theatre with id " + theatreID);
+    	}
+    	
+    	try {
+    		Performance performance = new Performance(idGenerator, act, theatre, startTimeStr, premiumPriceStr, cheapSeatsStr);
+    		state.getPerformanceRepository().add(performance);
+    		return performance.getId();
+    	} catch(TBSException e) {
+    		return error(e.getMessage());
+    	}
     }
 
     /**

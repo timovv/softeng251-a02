@@ -17,7 +17,7 @@ public class IdentifiableRepository<T extends Identifiable> implements Iterable<
 
     public void add(T toAdd) {
         if(values.containsKey(toAdd.getId())) {
-            throw new IllegalArgumentException("An object with the same ID already exists in the repository.");
+            throw new TBSException("An object with the same ID already exists in the repository.");
         }
 
         values.put(toAdd.getId(), toAdd);

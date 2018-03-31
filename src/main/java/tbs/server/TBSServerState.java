@@ -5,5 +5,4 @@ public interface TBSServerState {
     PerformanceRepository getPerformanceRepository();
     ArtistRepository getArtistRepository();
     ActRepository getActRepository();
-    TicketRepository getTicketRepository();
 }

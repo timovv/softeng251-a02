@@ -1,8 +1,5 @@
 package tbs.server;
 
-import java.util.Collection;
-import java.util.List;
-
 public class Artist implements Identifiable {
     private final String id;
     private final String name;

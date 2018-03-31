@@ -1,5 +1,8 @@
 package tbs.server;
 
+/**
+ * Objects that implement this interface have a unique ID, which is unique to all objects of that type.
+ */
 public interface Identifiable {
 
     /**

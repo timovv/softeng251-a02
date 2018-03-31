@@ -1,7 +1,6 @@
 package tbs.server;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 public class TBSSalesReportFormatter implements SalesReportFormatter {
@@ -19,18 +18,17 @@ public class TBSSalesReportFormatter implements SalesReportFormatter {
      */
     @Override
     public List<String> formatSalesReport(Act act) {
-        List<String> output = new LinkedList<>();
+        List<String> output = new ArrayList<>();
         for(Performance performance : state.getPerformanceRepository().getPerformancesForAct(act)) {
             String performanceId = performance.getId();
             String startTime = performance.getStartTime();
 
-            List<Ticket> ticketList = state.getTicketRepository().getTicketsForPerformance(performance);
+            List<Ticket> ticketList = performance.getIssuedTickets();
             int ticketsSold = ticketList.size();
 
             int salesReceipts = 0;
             for(Ticket ticket : ticketList) {
-                boolean premium = performance.getTheatre().isPremiumSeat(ticket.getSeatRow(), ticket.getSeatNumber());
-                salesReceipts += premium ? performance.getPremiumSeatPrice() : performance.getCheapSeatPrice();
+                salesReceipts += ticket.getPrice();
             }
 
             output.add(formatReportLine(performanceId, startTime, ticketsSold, salesReceipts));
