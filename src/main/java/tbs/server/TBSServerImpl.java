@@ -2,7 +2,9 @@ package tbs.server;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Implementation of the TBSServer interface for SOFTENG 251 assignment 2.
@@ -16,21 +18,19 @@ public class TBSServerImpl implements TBSServer {
     private final TBSServerState state = new MemoryTBSServerState();
     private final SalesReportFormatter salesReportFormatter = new TBSSalesReportFormatter(state);
 
-    /**
-     * Construct a new instance of TBSServerImpl.
-     */
     public TBSServerImpl() {
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String initialise(String path) {
+        if(path == null) {
+            return error("path cannot be null!");
+        }
+
         TheatreParser parser;
         try {
             parser = new TheatreParser(new File(path));
         } catch(FileNotFoundException | TBSException e) {
-            return "ERROR File " + path + " does not exist.";
+            return error("File " + path + " does not exist.");
         }
 
         List<Theatre> theatresToAdd;
@@ -44,35 +44,26 @@ public class TBSServerImpl implements TBSServer {
         return "";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getTheatreIDs() {
         return state.getTheatreRepository().getAllIDs();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getArtistIDs() {
         return state.getArtistRepository().getAllIDs();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getArtistNames() {
         return state.getArtistRepository().getArtistNames();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getActIDsForArtist(String artistID) {
         if(artistID == null) {
             return listError("artist ID cannot be null.");
         }
-        if(!idGenerator.isValidId(artistID)) {
+        if(artistID.isEmpty()) {
+            return listError("artist ID cannot be empty.");
+        }
+        if(!idGenerator.isValidID(artistID)) {
             return listError("artist ID is not a valid ID.");
         }
 
@@ -85,14 +76,11 @@ public class TBSServerImpl implements TBSServer {
         return state.getActRepository().getActIdsForArtist(artist);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getPeformanceIDsForAct(String actID) {
         if(actID == null) {
             return listError("act ID cannot be null.");
         }
-        if(!idGenerator.isValidId(actID)) {
+        if(!idGenerator.isValidID(actID)) {
             return listError("act ID is not a valid ID.");
         }
 
@@ -105,16 +93,24 @@ public class TBSServerImpl implements TBSServer {
         return state.getPerformanceRepository().getPerformancesIDsForAct(act);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public List<String> getTicketIDsForPerformance(String performanceID) {
-        return null;
+        if(performanceID == null) {
+            return listError("performanceID is null!");
+        }
+
+        if(performanceID.isEmpty()) {
+            return listError("performanceID cannot be empty");
+        }
+
+        Performance performance = state.getPerformanceRepository().getById(performanceID);
+
+        if(performance == null) {
+            return listError("No performance with ID " + performanceID);
+        }
+
+        return performance.getIssuedTicketIds();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String addArtist(String name) {
         if(name == null) {
             return error("name is null!");
@@ -133,9 +129,6 @@ public class TBSServerImpl implements TBSServer {
         return artist.getId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String addAct(String title, String artistID, int minutesDuration) {
         if(title == null) {
             return error("title is null!");
@@ -159,9 +152,6 @@ public class TBSServerImpl implements TBSServer {
         return act.getId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String schedulePerformance(String actID, String theatreID, String startTimeStr, String premiumPriceStr, String cheapSeatsStr) {
     	if(actID == null) {
     		return error("actID is null!");
@@ -196,9 +186,6 @@ public class TBSServerImpl implements TBSServer {
     	}
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public String issueTicket(String performanceID, int rowNumber, int seatNumber) {
         if(performanceID == null) {
             return error("performanceID is null!");
@@ -206,7 +193,7 @@ public class TBSServerImpl implements TBSServer {
         if(performanceID.isEmpty()) {
             return error("performanceID is empty!");
         }
-        if(!idGenerator.isValidId(performanceID)) {
+        if(!idGenerator.isValidID(performanceID)) {
             return error("performanceID is not a valid ID.");
         }
 
@@ -225,9 +212,6 @@ public class TBSServerImpl implements TBSServer {
         return ticket.getId();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public List<String> seatsAvailable(String performanceID) {
         if (performanceID == null) {
             return listError("performanceID is null!");
@@ -235,7 +219,7 @@ public class TBSServerImpl implements TBSServer {
         if (performanceID.isEmpty()) {
             return listError("performanceID is empty!");
         }
-        if (!idGenerator.isValidId(performanceID)) {
+        if (!idGenerator.isValidID(performanceID)) {
             return listError("performanceID is not a valid id!");
         }
 
@@ -253,9 +237,6 @@ public class TBSServerImpl implements TBSServer {
         return output;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public List<String> salesReport(String actID) {
         if(actID == null) {
             return listError("actID is null!");
@@ -263,7 +244,7 @@ public class TBSServerImpl implements TBSServer {
         if(actID.isEmpty()) {
             return listError("actID is empty!");
         }
-        if(!idGenerator.isValidId(actID)) {
+        if(!idGenerator.isValidID(actID)) {
             return listError("actID is not a valid id!");
         }
 
@@ -276,7 +257,7 @@ public class TBSServerImpl implements TBSServer {
     }
 
     public List<String> dump() {
-        return Collections.singletonList("Welcome to the Theatre Booking System, have a nice day.");
+        return Collections.singletonList("Welcome to the Theatre Booking System, powered by Oracle PeopleSoft\u2212");
     }
 
     private static String error(String message) {

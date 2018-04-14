@@ -11,9 +11,8 @@ public class InitialiseTest {
 
     @Test
     void initialiseWorksCorrectly() {
-        String fileName = "src/test/resources/theatres1.csv";
         TBSServer server = new TBSServerImpl();
-        String result = server.initialise(fileName);
+        String result = TestUtil.initialiseTestData(server);
         assertEquals(result, "");
         List<String> theatreIds = server.getTheatreIDs();
         assertEquals(theatreIds.get(0), "T1");

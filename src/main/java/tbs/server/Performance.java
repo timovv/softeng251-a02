@@ -1,9 +1,12 @@
 package tbs.server;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A performance in the Theatre Booking System.
@@ -11,6 +14,8 @@ import java.util.Map;
  * Each performance is of an act, and is performed in a specific theatre at a specific start time.
  */
 public class Performance implements Identifiable {
+
+    private static final NumberFormat PRICE_STRING_FORMAT = new DecimalFormat("$0");
 
     private final IDGenerator idGenerator;
     private final String id;
@@ -34,35 +39,30 @@ public class Performance implements Identifiable {
     }
 
     public Performance(IDGenerator idGenerator, Act act, Theatre theatre, String startTime, int premiumSeatPrice, int cheapSeatPrice) {
-        this.idGenerator = idGenerator;
-        this.id = idGenerator.createUniqueId();
-        this.act = act;
-        this.theatre = theatre;
-        this.startTime = startTime;
+        this.idGenerator = Objects.requireNonNull(idGenerator);
+        this.id = idGenerator.createUniqueID();
+        this.act = Objects.requireNonNull(act);
+        this.theatre = Objects.requireNonNull(theatre);
+        this.startTime = Objects.requireNonNull(startTime);
         this.premiumSeatPrice = premiumSeatPrice;
         this.cheapSeatPrice = cheapSeatPrice;
     }
 
-    private static int parsePriceString(String price) {
-        if(price.charAt(0) != '$') {
-            throw new TBSException("Invalid price string format.");
-        }
-
+    private static int parsePriceString(String s) {
         try {
-            return Integer.parseInt(price.substring(1));
-        } catch(NumberFormatException nex) {
-            throw new TBSException("Invalid price string format.", nex);
+            return PRICE_STRING_FORMAT.parse(s).intValue();
+        } catch(Exception ex) {
+            throw new TBSException("Invalid price string format", ex);
         }
     }
 
     public Ticket issueTicket(int rowNumber, int seatNumber) {
-        if (rowNumber < 1 || seatNumber < 1 || rowNumber > theatre.getSeatingDimension()
-                || seatNumber > theatre.getSeatingDimension()) {
-            throw new TBSException("Seat is out of bounds for this theatre");
-        }
-        
         Seat seat = theatre.getSeatAt(rowNumber, seatNumber);
-        
+
+        if(seat == null) {
+            throw new TBSException("This theatre does not have seat with row " + rowNumber + " and seat " + seatNumber);
+        }
+
         if (tickets.get(theatre.getSeatAt(rowNumber, seatNumber)) != null) {
             throw new TBSException("Seat [" + rowNumber + ", " + seatNumber + "] is already taken.");
         }
@@ -86,17 +86,24 @@ public class Performance implements Identifiable {
     public List<Ticket> getIssuedTickets() {
     	return new ArrayList<>(tickets.values());
     }
+
+    public List<String> getIssuedTicketIds() {
+        ArrayList<String> output = new ArrayList<>();
+        for(Ticket ticket : tickets.values()) {
+            output.add(ticket.getId());
+        }
+
+        return output;
+    }
     
     private int calculatePriceForSeat(Seat seat) {
     	if(seat.isPremiumSeat()) {
-    		return premiumSeatPrice;
+    		return getPremiumSeatPrice();
     	} else {
-    		return cheapSeatPrice;
+    		return getCheapSeatPrice();
     	}
     }
     
-    // GETTERS AND SETTERS
-
     @Override
     public String getId() {
         return id;

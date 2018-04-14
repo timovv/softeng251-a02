@@ -10,11 +10,11 @@ public class Ticket implements Identifiable {
 
     /**
      * Construct a new ticket.
-     * @param idGenerator The
-     * @param price
+     * @param idGenerator An IDGenerator to be used to generate this Ticket's ID.
+     * @param price The price of the ticket in dollars.
      */
     public Ticket(IDGenerator idGenerator, int price) {
-        this.id = idGenerator.createUniqueId();
+        this.id = idGenerator.createUniqueID();
         this.price = price;
     }
 

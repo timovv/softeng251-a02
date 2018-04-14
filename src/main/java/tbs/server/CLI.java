@@ -1,11 +1,18 @@
 package tbs.server;
 
-import java.lang.reflect.*;
-import java.util.Scanner;
+import java.lang.reflect.Method;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Scanner;
 
 public class CLI {
 	public static void main(String...args) throws Exception {
+
+		NumberFormat nf = new DecimalFormat("$0");
+		int x = nf.parse("$3").intValue();
+		System.out.println(x);
+
 		TBSServerImpl server = new TBSServerImpl();
 		Scanner scanner = new Scanner(System.in);
 		

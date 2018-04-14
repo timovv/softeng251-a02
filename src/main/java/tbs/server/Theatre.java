@@ -14,11 +14,7 @@ public class Theatre implements Identifiable {
     private final List<Seat> seats;
 
     public Theatre(IDGenerator idGenerator, int seatingDimension, int floorArea) {
-        this(idGenerator.createUniqueId(), seatingDimension, floorArea);
-    }
-    
-    public Theatre(String id, int seatingDimension, int floorArea) {
-    	this.id = id;
+    	this.id = idGenerator.createUniqueID();
         this.seatingDimension = seatingDimension;
         this.floorArea = floorArea;
 

@@ -3,6 +3,7 @@ package tbs.server;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A collection of artists in the Theatre Booking System.
@@ -31,6 +32,8 @@ public class ArtistRepository extends IdentifiableRepository<Artist> {
      */
     @Override
     public void add(Artist artist) {
+        Objects.requireNonNull(artist);
+
         for(Artist other : getAllValues()) {
             if(other.getName().equalsIgnoreCase(artist.getName())) {
                 throw new TBSException("Artist with this name already exists");
