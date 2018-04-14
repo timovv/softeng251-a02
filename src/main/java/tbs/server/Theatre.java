@@ -19,9 +19,9 @@ public class Theatre implements Identifiable {
         this.floorArea = floorArea;
 
         this.seats = new ArrayList<>();
-        for(int i = 0; i < seatingDimension; ++i) {
-            for(int j = 0; j < seatingDimension; ++j) {
-                seats.add(new Seat(i + 1, j + 1, isPremiumSeatLocation(i + 1, j + 1)));
+        for(int i = 1; i <= seatingDimension; ++i) {
+            for(int j = 1; j <= seatingDimension; ++j) {
+                seats.add(new Seat(i, j, isPremiumSeatLocation(i, j)));
             }
         }
     }
@@ -50,8 +50,8 @@ public class Theatre implements Identifiable {
     public Seat getSeatAt(int row, int seatNumber) {
     	return seats.get((row - 1) * seatingDimension + (seatNumber - 1));
     }
-    
+
     protected boolean isPremiumSeatLocation(int row, int seatNumber) {
-        return (row * seatingDimension) + seatNumber <= getSeatCount() / 2;
+        return row <= getSeatingDimension() / 2;
     }
 }
