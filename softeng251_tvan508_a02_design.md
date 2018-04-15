@@ -55,7 +55,7 @@ warrant discussion.
 **Identifiable**
 
 Almost all entities in the domain model (Act, Artist, Performance, Theatre, Ticket, etc...)
-have a unique ID. The `Identifiable` interface allows for the 
+have a unique ID. The `Identifiable` interface allows for the abstraction of operations on objects with unique IDs.
 
 **IdentifiableRepository and subclasses**
 
