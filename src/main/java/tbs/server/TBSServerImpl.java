@@ -11,7 +11,7 @@ import java.util.List;
  * {@inheritDoc}
  *
  * @author Timo van Veenendaal
- * @version 1.0-SNAPSHOT
+ * @version 1.0.0
  */
 public class TBSServerImpl implements TBSServer {
     private final IDGenerator idGenerator = new AutoIncrementIDGenerator();
@@ -30,7 +30,7 @@ public class TBSServerImpl implements TBSServer {
         try {
             parser = new TheatreParser(new File(path));
         } catch(FileNotFoundException | TBSException e) {
-            return error("File " + path + " does not exist.");
+            return error(e.getMessage());
         }
 
         List<Theatre> theatresToAdd;
@@ -253,11 +253,15 @@ public class TBSServerImpl implements TBSServer {
             return listError("No act exists with id " + actID);
         }
 
-        return salesReportFormatter.formatSalesReport(act);
+        try {
+            return salesReportFormatter.formatSalesReport(act);
+        } catch(TBSException e) {
+            return listError(e.getMessage());
+        }
     }
 
     public List<String> dump() {
-        return Collections.singletonList("Welcome to the Theatre Booking System, powered by Oracle PeopleSoft\u2212");
+        return Collections.singletonList("Theatre Booking System 1.0 brought to you using Oracle\u00ae PeopleSoft\u2122");
     }
 
     private static String error(String message) {

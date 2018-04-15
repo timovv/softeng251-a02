@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * A performance in the Theatre Booking System.
@@ -16,6 +17,8 @@ import java.util.Objects;
 public class Performance implements Identifiable {
 
     private static final NumberFormat PRICE_STRING_FORMAT = new DecimalFormat("$0");
+    // time in the form YYYY-dd-mmThh:mm:ss
+    private static final Pattern TIME_PATTERN = Pattern.compile("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}");
 
     private final IDGenerator idGenerator;
     private final String id;
@@ -44,6 +47,11 @@ public class Performance implements Identifiable {
         this.act = Objects.requireNonNull(act);
         this.theatre = Objects.requireNonNull(theatre);
         this.startTime = Objects.requireNonNull(startTime);
+
+        if(!TIME_PATTERN.matcher(startTime).matches()) {
+            throw new TBSException("startTime does not follow the required format.");
+        }
+
         this.premiumSeatPrice = premiumSeatPrice;
         this.cheapSeatPrice = cheapSeatPrice;
     }

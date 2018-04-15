@@ -14,9 +14,6 @@ public class CustomIDGenerator implements IDGenerator {
     private Set<String> previousIDs = new HashSet<>();
     private String nextID = null;
 
-    /**
-     * Construct a new CustomIDGenerator.
-     */
     public CustomIDGenerator() {
     }
 
@@ -39,7 +36,7 @@ public class CustomIDGenerator implements IDGenerator {
 
     /**
      * For CustomIDGenerator, all possible strings could be valid IDs.
-     * @return true
+     * @return true always.
      */
     @Override
     public boolean isValidID(String id) {
